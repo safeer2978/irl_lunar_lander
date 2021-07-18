@@ -1,0 +1,38 @@
+Version:
+	id:
+	version_number:
+	data_of_creation:
+	description:
+
+Episode:
+	Meta:
+		version
+		type_label:
+		expert_name:
+		date_time
+	Final State:
+		state_tuple
+		cummalitive_reward
+		total_fuel_consumed
+	step_reference
+	Config:
+		delay
+
+step:
+		capture_frame
+		metainfo:
+			id:
+			sequence_number
+		States:
+			(horizontal coordinate
+			vertical coordinate
+			horizontal speed
+			vertical speed
+			angle
+			angular speed
+			first leg has contact, else 0
+			second leg has contact, else 0)
+		Reward
+		action:
+		derived_outputs:
+			fuel_consumed
