@@ -44,12 +44,16 @@ root = None
 def click_start():
     global human_wants_start, human_wants_stop, save_button_enabled
 
+    print("click start called")
+
     human_wants_start = True
     human_wants_stop = False
     save_button_enabled = False
     
 def click_stop():
     global human_wants_stop, human_wants_start, save_button_enabled
+
+    print("click stop called")
 
     human_wants_stop = True
     human_wants_start = False
@@ -96,8 +100,9 @@ def click_save():
                          config=config, notes = episode_desc)
 
     # Calling Save Function
-    #saveData(episode, step_list)
+    saveData(episode, step_list)
 
+    print("data saved")
     step_list.clear()
 
 def click_exit():
@@ -110,7 +115,7 @@ def click_exit():
 # TKINTER CODE
 def display_loop():
     
-    global root, save_button_enabled
+    global root
     
     # main tkinter configs
     root = tk.Tk()
@@ -162,12 +167,6 @@ def display_loop():
     # Save Buton
     savebutton = Button(root, text="Save", fg="blue", command=click_save)
     savebutton.pack()
-    
-    # if save_button_enabled:
-    #     print("save button enabled")
-    #     savebutton["state"] = "enabled"
-    # else:
-    #     savebutton["state"] = "disabled"
 
 
     # Exit Button
@@ -271,7 +270,8 @@ env.unwrapped.viewer.window.on_key_release = key_release
 
 # list to record Step Data-> Environment
 step_list = []
-
+import base64
+import numpy as np
 def rollout(env, startTime):
     
     global human_agent_action, human_wants_restart, human_sets_pause, human_wants_stop, human_wants_start, user_choice, label_choice, human_wants_exit, step_list, save_button_enabled
@@ -316,7 +316,7 @@ def rollout(env, startTime):
             env.render()
 
         environment = Environment (
-                        state=obser,
+                        state=obser.tolist(),
                         action = tuple(flags),
                         reward=r)
 
@@ -324,7 +324,7 @@ def rollout(env, startTime):
         fuel_consumed = -1
 
         #capturing frame from render as an rgb_array
-        frame = env.render('ansi')
+        frame = s = base64.b64encode(np.array(env.render('rgb_array')))
 
         step_list.append(
             Step(parent_episode_ref=0,
