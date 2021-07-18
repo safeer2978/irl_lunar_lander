@@ -63,14 +63,11 @@ class Episode():
     meta: Meta
     final_state:Final_State
     config: Config
+    notes: str
     
-
-@dataclass
-class Step():
-    a:int
-
 # print(asdict(Episode(id=5,
 #                     version=54,
+#                     notes="some notes",
 #                     meta = Meta("normal", "safeer", "monday"),
 #                     final_state= Final_State((1,2,3),123,123),
 #                     config=Config(12,13) )))
