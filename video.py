@@ -1,0 +1,1 @@
+from gym.wrappers.monitoring.video_recorder import VideoRecorder

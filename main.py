@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+import os.path
+import numpy as np
+from PIL import Image as Img
+
 import gym, time
 
 import tkinter as tk
@@ -72,7 +76,7 @@ def click_save():
     if (not human_wants_stop) or (not step_list):
         return
     
-    print("Inside Step List", step_list)
+    #print("Inside Step List", step_list)
     
     step_count = len(step_list)
     date = datetime.datetime.now()
@@ -265,7 +269,30 @@ def key_release(key, mod):
 env.render()
 env.unwrapped.viewer.window.on_key_press = key_press
 env.unwrapped.viewer.window.on_key_release = key_release
+import io
 
+
+def numpy2pil(np_array: np.ndarray):
+    """
+    Convert an HxWx3 numpy array into an RGB Image
+    """
+    #print(np_array)
+    assert_msg = 'Input shall be a HxWx3 ndarray'
+    assert isinstance(np_array, np.ndarray), assert_msg
+    assert len(np_array.shape) == 3, assert_msg
+    assert np_array.shape[2] == 3, assert_msg
+
+    img = Img.fromarray(np_array, 'RGB')
+    #img.save("x.png")
+
+    img_byte_arr = io.BytesIO()
+    img.save(img_byte_arr, format="PNG")
+
+    #f = open("myfile.png", "wb")
+    #f.write(img_byte_arr.getvalue())
+    #f.flush()
+    #f.close()
+    return img_byte_arr.getvalue()
 
 
 # list to record Step Data-> Environment
@@ -324,7 +351,13 @@ def rollout(env, startTime):
         fuel_consumed = -1
 
         #capturing frame from render as an rgb_array
-        frame = s = base64.b64encode(np.array(env.render('rgb_array')))
+        nparray = np.array(env.render('rgb_array'))
+
+        frame = numpy2pil(nparray)
+        #print(frame)
+
+        #x = Img.frombytes(frame)
+        #x.save("123.png")
 
         step_list.append(
             Step(parent_episode_ref=0,
@@ -369,7 +402,7 @@ while 1:
         # print('thread killed')
         env.close()
         break
-    
+
 print("broken out of all loops")
 
 
