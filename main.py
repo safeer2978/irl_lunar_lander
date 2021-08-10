@@ -21,7 +21,7 @@ if not hasattr(env.action_space, 'n'):
     raise Exception('Keyboard agent only supports discrete action spaces')
 
 # CONSTANTS
-render_speed = 0.009
+render_speed = 0.05
 ACTIONS = env.action_space.n
                     
 # USER CONFIGS
@@ -49,16 +49,20 @@ def click_start():
     global human_wants_start, human_wants_stop, save_button_enabled
 
     print("click start called")
-
+    rollout(env, current_milli_time())
     human_wants_start = True
     human_wants_stop = False
     save_button_enabled = False
     
 def click_stop():
-    global human_wants_stop, human_wants_start, save_button_enabled
+    global human_wants_stop, human_wants_start, save_button_enabled, step_list
 
     print("click stop called")
-
+    total_reward = 0
+    for step in step_list:
+        total_reward += step.environment.reward
+    print("total reward:")
+    print(total_reward)
     human_wants_stop = True
     human_wants_start = False
     save_button_enabled = True
@@ -107,6 +111,7 @@ def click_save():
     saveData(episode, step_list)
 
     print("data saved")
+    #print(episode)
     step_list.clear()
 
 def click_exit():
@@ -214,63 +219,44 @@ app = App()
 def current_milli_time():
     return round(time.time() * 1000)
 
+
 def mapWasd(key):
-    # print(key)
+    #print(key)
 
-    # w -> 71 d -> 52 a -> 49
-    # center engine -> 2 
-    # left engine -> 1
-    # right engine -> 3
+    ## w->71 d->52 a->49
+    ## center engine->2 left engine->1, right engine->3
 
-    if (key == 71):
+    if(key == 71):
         return 2
-    
-    if (key == 52):
+    if(key == 52):
         return 3
-    
-    if (key == 49):
+    if(key==49):
         return 1
-    
     return 0
 
 
-# ENV FUNCTIONS
 def key_press(key, mod):
-    
     global human_agent_action, human_wants_restart, human_sets_pause
-    
-    if key == 0xff0d:
-        human_wants_restart = True
-        
-    if key == 32:
-        human_sets_pause = not human_sets_pause
-        
-    a = mapWasd(int(key - ord('0')))
-    
-    if a <= 0 or a >= ACTIONS:
-        return
-    
-    flags[a] = True
+    if key==0xff0d: human_wants_restart = True
+    if key==32: human_sets_pause = not human_sets_pause
+    a = mapWasd(int( key - ord('0') ))
+    if a <= 0 or a >= ACTIONS: return
+    human_agent_action = a
+    flags[a]=True
 
 def key_release(key, mod):
-
     global human_agent_action
-    
     a = mapWasd(int( key - ord('0') ))
-    
-    if a <= 0 or a >= ACTIONS:
-        return
-    
+    if a <= 0 or a >= ACTIONS: return
     if human_agent_action == a:
         human_agent_action = 0
-        
-    flags[a] = False
+    flags[a]=False
 
 env.render()
 env.unwrapped.viewer.window.on_key_press = key_press
 env.unwrapped.viewer.window.on_key_release = key_release
-import io
 
+import io
 
 def numpy2pil(np_array: np.ndarray):
     """
@@ -310,6 +296,7 @@ def rollout(env, startTime):
     # save_button_enabled = False
     
     obser = env.reset()
+    step_list = [] 
     # print("After reset")
 
     total_reward = 0
@@ -330,17 +317,14 @@ def rollout(env, startTime):
 
         actionCount = 1
         noAction = True
-        for i in range(4):
-            if(flags[i]):
-                noAction = False
-                obser, r, done, info = env.step(i)
-                actionCount+=1
-                env.render()
+        
+        obser, r, done, info = env.step(a)
+        print(r)
+
+                #actionCount+=1
+                #env.render()
                 #env.render()
 
-        if(noAction):
-            obser, r, done, info = env.step(0)
-            env.render()
 
         environment = Environment (
                         state=obser.tolist(),
@@ -372,6 +356,9 @@ def rollout(env, startTime):
         #if done: break
         #if human_wants_restart: break
         
+        if done:
+            click_stop()
+
         if human_wants_start:
             # print("Pressed Restart")
             break
