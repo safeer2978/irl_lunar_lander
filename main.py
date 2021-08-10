@@ -14,14 +14,16 @@ import threading
 
 from data import Environment, Episode, Derived, Step, Meta, Config, Final_State, saveData
 
-# ENV CONFIG
-env = gym.make('LunarLander-v2')
+import LunarLander;
 
+# ENV CONFIG
+env = LunarLander.LunarLander()
+print(type(env))
 if not hasattr(env.action_space, 'n'):
     raise Exception('Keyboard agent only supports discrete action spaces')
 
 # CONSTANTS
-render_speed = 0.05
+render_speed = 0.04
 ACTIONS = env.action_space.n
                     
 # USER CONFIGS
